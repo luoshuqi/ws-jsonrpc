@@ -1,11 +1,13 @@
 # jsonrpc
 
 #### 介绍
+
 Rust 编写的 jsonrpc 服务端，通过 websocket 调用。
 
 #### 使用说明
 
 ##### 方法包装
+
 ```rust
 #[rpc]
 async fn greeting(name: String) -> Result<String, Infallible> {
@@ -20,6 +22,7 @@ fn next_id() -> Result<u64, Infallible> {
 ```
 
 使用 `rpc` 宏可以把符合以下条件的函数（包括异步函数）包装成 rpc 方法:
+
 1. 没有参数或者所有参数类型都实现了 `serde::Deserialize`
 2. 返回类型为 `Result<T, E> where T: serde::Serialize, jsonrpc::response::Error: From<E>`
 
@@ -31,6 +34,7 @@ fn next_id() -> Result<u64, Infallible> {
 ```
 
 ##### 方法注册
+
 ```rust
 let mut handler = Handler::new();
 handler.register(vec![method!(greeting), method!(next_id)]);
