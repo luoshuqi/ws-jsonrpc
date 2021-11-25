@@ -8,6 +8,7 @@ use std::pin::Pin;
 use serde::Serialize;
 use serde_json::{to_value, Value};
 
+pub use ws;
 pub use ws_jsonrpc_codegen::rpc;
 
 use crate::response::Error;
