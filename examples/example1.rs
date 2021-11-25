@@ -58,7 +58,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
 async fn handle_client(mut stream: TcpStream, handler: Arc<Handler>) -> Result<(), Box<dyn Error>> {
     let mut buf = vec![0u8; 1024];
     let req = Request::new(&mut stream, &mut buf, Duration::from_secs(60)).await?;
-    debug!("{}", req.uri());
     match req.uri().split('?').next().unwrap() {
         "/" => match WebSocket::upgrade(&req, stream).await? {
             Some(ws) => handler.handle(ws).await?,
