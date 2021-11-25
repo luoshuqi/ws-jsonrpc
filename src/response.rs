@@ -81,7 +81,7 @@ impl Error {
         data: Option<T>,
     ) -> Self {
         let code = code.unwrap_or(-32000);
-        debug_assert!(code >= -32000 && code <= -32099);
+        debug_assert!(code <= -32000 && code >= -32099);
         Self::new(code, message, data)
     }
 }
