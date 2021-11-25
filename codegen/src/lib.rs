@@ -14,18 +14,18 @@ pub fn rpc(_attr: TokenStream, item: TokenStream) -> TokenStream {
     let gen = if item.sig.asyncness.is_some() {
         quote! {
             use futures::future::FutureExt;
-            Box::pin(f.map(jsonrpc::convert))
+            Box::pin(f.map(ws_jsonrpc::convert))
         }
     } else {
         quote! {
-            Box::pin(ready(jsonrpc::convert(f)))
+            Box::pin(ready(ws_jsonrpc::convert(f)))
         }
     };
 
     let gen = quote! {
-        #vis fn #name(mut args: Vec<serde_json::Value>) -> jsonrpc::MethodReturnType {
+        #vis fn #name(mut args: Vec<serde_json::Value>) -> ws_jsonrpc::MethodReturnType {
             use std::future::ready;
-            use jsonrpc::response::Error;
+            use ws_jsonrpc::response::Error;
             use serde_json::from_value;
             use std::mem::take;
 

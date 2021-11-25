@@ -1,5 +1,5 @@
 [package]
-name = "jsonrpc"
+name = "ws_jsonrpc"
 version = "0.1.0"
 edition = "2021"
 
@@ -7,7 +7,7 @@ edition = "2021"
 
 [dependencies]
 ws = { git = "https://gitee.com/luoshuqi/ws" }
-jsonrpc_codegen = { path = "jsonrpc_codegen" }
+ws_jsonrpc_codegen = { path = "codegen" }
 tokio = { version = "1", features = ["io-util", "time", "macros"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"

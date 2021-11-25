@@ -11,8 +11,8 @@ use ws::request::Request;
 use ws::response::{Response, NOT_FOUND};
 use ws::websocket::WebSocket;
 
-use jsonrpc::handler::Handler;
-use jsonrpc::{method, rpc};
+use ws_jsonrpc::handler::Handler;
+use ws_jsonrpc::{method, rpc};
 
 #[rpc]
 async fn greeting(name: String) -> Result<String, Infallible> {
