@@ -48,4 +48,4 @@ Handler::handle 方法会处理传入的 [Websocket](https://gitee.com/luoshuqi/
 handler.handle(ws)
 ```
 
-[完整示例](https://gitee.com/luoshuqi/jsonrpc/blob/master/examples/example1.rs)
+[完整示例](https://gitee.com/luoshuqi/ws-jsonrpc/blob/master/examples/example1.rs)
