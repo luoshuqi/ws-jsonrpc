@@ -1,8 +1,10 @@
 use std::collections::HashMap;
+use std::sync::Arc;
 
 use log::{debug, error};
 use serde_json::to_vec;
 use tokio::io::{AsyncRead, AsyncWrite};
+use tokio::sync::mpsc::{unbounded_channel, UnboundedSender};
 use ws::websocket::{Message, Opcode, WebSocket};
 
 use crate::request::Request;
@@ -28,46 +30,65 @@ impl Handler {
     }
 
     pub async fn handle<T: AsyncRead + AsyncWrite + Unpin>(
-        &self,
+        self: &Arc<Self>,
         mut ws: WebSocket<T>,
     ) -> Result<(), ws::error::Error> {
         let mut close_send = false;
+        let (tx, mut rx) = unbounded_channel::<Response>();
         loop {
-            match ws.receive().await? {
-                Some(msg) => match msg.opcode() {
-                    Opcode::Text | Opcode::Binary => {
-                        match match Request::parse(msg.payload()) {
-                            Ok(req) => {
-                                debug!("receive {:?}", req);
-                                self.call(req).await
+            tokio::select! {
+                msg = ws.receive() => {
+                    match msg? {
+                        Some(msg) => match msg.opcode() {
+                            Opcode::Text | Opcode::Binary => self.handle_request(msg.payload(), &tx),
+                            Opcode::Ping => {
+                                let payload = msg.payload().to_vec();
+                                ws.send(Message::new(Opcode::Pong, &payload)).await?;
                             }
-                            Err(resp) => resp,
-                        } {
-                            Some(resp) => match to_vec(&resp) {
-                                Ok(data) => ws.send(Message::text(&data)).await?,
-                                Err(err) => error!("serialize {:?} error: {:?}", resp, err),
-                            },
-                            None => {}
-                        }
+                            Opcode::Pong => {}
+                            Opcode::Close if close_send => break,
+                            Opcode::Close => {
+                                close_send = true;
+                                ws.send(Message::close(&[])).await?;
+                            }
+                        },
+                        None => break,
                     }
-                    Opcode::Ping => {
-                        let payload = msg.payload().to_vec();
-                        ws.send(Message::new(Opcode::Pong, &payload)).await?;
+                }
+                resp = rx.recv() => {
+                    match resp {
+                        Some(resp) => match to_vec(&resp) {
+                            Ok(data) => ws.send(Message::text(&data)).await?,
+                            Err(err) => error!("serialize {:?} error: {:?}", resp, err),
+                        },
+                        None => unreachable!(),
                     }
-                    Opcode::Pong => {}
-                    Opcode::Close if close_send => break,
-                    Opcode::Close => {
-                        close_send = true;
-                        ws.send(Message::close(&[])).await?;
-                    }
-                },
-                None => break,
+                }
             }
         }
         Ok(())
     }
 
-    async fn call(&self, req: Request) -> Option<Response> {
+    fn handle_request(self: &Arc<Self>, payload: &[u8], tx: &UnboundedSender<Response>) {
+        match Request::parse(payload) {
+            Ok(req) => {
+                debug!("receive {:?}", req);
+                let tx = tx.clone();
+                let this = Arc::clone(self);
+                tokio::spawn(async move {
+                    if let Some(resp) = this.call(req).await {
+                        let _ = tx.send(resp);
+                    }
+                });
+            }
+            Err(Some(resp)) => {
+                let _ = tx.send(resp);
+            }
+            Err(None) => {}
+        }
+    }
+
+    async fn call(self: &Arc<Self>, req: Request) -> Option<Response> {
         match self.methods.get(req.method.as_str()) {
             Some(method) => {
                 let args = req.params.unwrap_or(Vec::new());
