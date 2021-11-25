@@ -1,0 +1,20 @@
+[package]
+name = "jsonrpc"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+ws = { git = "https://gitee.com/luoshuqi/ws" }
+jsonrpc_codegen = { path = "jsonrpc_codegen" }
+tokio = { version = "1", features = ["io-util", "time", "macros"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+futures = "0"
+log = "0"
+
+[dev-dependencies]
+tokio = { version = "1", features = ["full"] }
+log = "0"
+env_logger = "0"
