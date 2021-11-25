@@ -18,28 +18,27 @@ pub fn rpc(_attr: TokenStream, item: TokenStream) -> TokenStream {
         }
     } else {
         quote! {
-            Box::pin(ready(ws_jsonrpc::convert(f)))
+            Box::pin(std::future::ready(ws_jsonrpc::convert(f)))
         }
     };
 
     let gen = quote! {
         #vis fn #name(mut args: Vec<serde_json::Value>) -> ws_jsonrpc::MethodReturnType {
-            use std::future::ready;
-            use ws_jsonrpc::response::Error;
-            use serde_json::from_value;
-            use std::mem::take;
-
             if #argc != args.len() {
                 let msg = format!("expected {} parameters, {} given", #argc, args.len());
-                return Box::pin(ready(Err(Error::invalid_params(Some(msg)))));
+                let error = ws_jsonrpc::response::Error::invalid_params(Some(msg));
+                return Box::pin(std::future::ready(Err(error)));
             }
 
             #item
 
             let f = #name(#(
-                match from_value(take(&mut args[#pos])) {
+                match serde_json::from_value(std::mem::take(&mut args[#pos])) {
                     Ok(arg) => arg,
-                    Err(err) => return Box::pin(ready(Err(Error::invalid_params(Some(format!("{}", err)))))),
+                    Err(err) => {
+                        let error = ws_jsonrpc::response::Error::invalid_params(Some(format!("{}", err)));
+                        return Box::pin(std::future::ready(Err(error)));
+                    }
                 }
             ),*);
 
