@@ -5,7 +5,7 @@ Rust 编写的 jsonrpc 服务端，通过 websocket 调用。
 
 #### 使用说明
 
-#### 方法包装
+##### 方法包装
 ```rust
 #[rpc]
 async fn greeting(name: String) -> Result<String, Infallible> {
@@ -30,13 +30,13 @@ fn next_id() -> Result<u64, Infallible> {
           jsonrpc::response::Error: From<E>
 ```
 
-#### 方法注册
+##### 方法注册
 ```rust
 let mut handler = Handler::new();
 handler.register(vec![method!(greeting), method!(next_id)]);
 ```
 
-#### 方法调用
+##### 方法调用
 
 Handler::handle 方法会处理传入的 [Websocket](https://gitee.com/luoshuqi/ws) 对象上的请求。
 
