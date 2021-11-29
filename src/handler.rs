@@ -72,7 +72,7 @@ impl Handler {
     fn handle_request(self: &Arc<Self>, payload: &[u8], tx: &UnboundedSender<Response>) {
         match Request::parse(payload) {
             Ok(req) => {
-                debug!("call {}", req.method);
+                debug!("{}", req);
                 let tx = tx.clone();
                 let this = Arc::clone(self);
                 tokio::spawn(async move {

@@ -1,5 +1,6 @@
 use serde::Deserialize;
-use serde_json::Value;
+use serde_json::{to_string, Value};
+use std::fmt::{Display, Formatter};
 
 use crate::response::{Error, Response};
 
@@ -9,6 +10,18 @@ pub struct Request {
     pub(crate) method: String,
     pub(crate) params: Option<Vec<Value>>,
     pub(crate) id: Option<Value>,
+}
+
+impl Display for Request {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "Request {{ jsonrpc: {}, method: {}, params: ..., id: {} }}",
+            self.jsonrpc,
+            self.method,
+            to_string(&self.id).unwrap()
+        )
+    }
 }
 
 impl Request {
