@@ -5,6 +5,7 @@
 use std::future::Future;
 use std::pin::Pin;
 
+pub use futures;
 use serde::Serialize;
 use serde_json::{to_value, Value};
 pub use ws;

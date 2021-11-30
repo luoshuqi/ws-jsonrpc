@@ -13,7 +13,7 @@ pub fn rpc(_attr: TokenStream, item: TokenStream) -> TokenStream {
 
     let gen = if item.sig.asyncness.is_some() {
         quote! {
-            use futures::future::FutureExt;
+            use ws_jsonrpc::futures::future::FutureExt;
             Box::pin(f.map(ws_jsonrpc::convert))
         }
     } else {
