@@ -1,6 +1,7 @@
+use std::fmt::{Display, Formatter};
+
 use serde::Deserialize;
 use serde_json::{to_string, Value};
-use std::fmt::{Display, Formatter};
 
 use crate::response::{Error, Response};
 
